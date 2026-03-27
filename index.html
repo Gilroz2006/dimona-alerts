@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>דימונה LIVE - מערכת התרעות</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #0a0e14; color: white; font-family: sans-serif; }
         .header { text-align: center; margin-bottom: 30px; }
@@ -31,7 +29,7 @@
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
         }
         .update-btn:active { transform: scale(0.95); background: #2980b9; }
-        .update-btn:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
+        .update-btn:disabled { background: #555; cursor: not-allowed; }
 
         .update-info { margin-top: 25px; background: #161b22; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; }
         .footer { margin-top: 30px; color: #444; font-size: 0.8rem; }
@@ -46,7 +44,7 @@
     <div id="container" class="status-container">
         <div class="status-circle">
             <div id="statusIcon" style="font-size: 3rem;">⏳</div>
-            <div id="statusLabel" style="font-size: 1.5rem; font-weight: bold; margin-top: 10px;">מתחבר...</div>
+            <div id="statusLabel" style="font-size: 1.5rem; font-weight: bold; margin-top: 10px;">טוען נתונים...</div>
         </div>
     </div>
 
@@ -56,87 +54,69 @@
     <div class="footer">פותח ע"י גלבוע רוזיליו</div>
 
     <script>
-        // הגדרת Firebase
-        const firebaseConfig = { 
-            databaseURL: "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app" 
-        };
-        
-        // אתחול
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
+
+        // פונקציה למשיכת הנתונים מ-Firebase
+        function fetchData() {
+            fetch(dbUrl)
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        updateUI(data);
+                    }
+                })
+                .catch(err => console.error("Error fetching data:", err));
         }
 
-        // פונקציית העדכון הידנית (הכפתור)
+        // עדכון הממשק
+        function updateUI(data) {
+            const container = document.getElementById('container');
+            const label = document.getElementById('statusLabel');
+            const timeLabel = document.getElementById('timeLabel');
+            const icon = document.getElementById('statusIcon');
+
+            timeLabel.innerText = data.last_update || "00:00:00";
+            container.className = "status-container";
+
+            if (data.status === 'green') { 
+                container.classList.add('status-green'); 
+                label.innerText = "העיר שקטה"; label.style.color = "#2ecc71"; icon.innerText = "🛡️"; 
+            } else if (data.status === 'yellow') { 
+                container.classList.add('status-yellow'); 
+                label.innerText = "חשש להתרעה"; label.style.color = "#f1c40f"; icon.innerText = "⚠️"; 
+            } else if (data.status === 'orange') { 
+                container.classList.add('status-orange'); 
+                label.innerText = "התרעה מקדימה"; label.style.color = "#e67e22"; icon.innerText = "🔔"; 
+            } else if (data.status === 'red') { 
+                container.classList.add('status-red'); 
+                label.innerText = "צבע אדום!"; label.style.color = "#e74c3c"; icon.innerText = "🚨"; 
+            }
+        }
+
+        // הפעלת סריקה בבוט
         function triggerUpdate() {
             const btn = document.getElementById('updateBtn');
             btn.disabled = true;
-            btn.innerText = "⏳ שולח בקשה...";
+            btn.innerText = "מבצע סריקה...";
 
             fetch("https://dimona-alerts-bot.onrender.com/health")
-                .then(response => {
-                    console.log("Request sent to bot");
-                    btn.innerText = "✅ נשלח! ממתין לעדכון...";
+                .then(() => {
+                    // מחכים 3 שניות שהבוט יסיים לעדכן את ה-Firebase ואז מושכים נתונים חדשים
                     setTimeout(() => {
+                        fetchData();
                         btn.disabled = false;
                         btn.innerText = "🔄 עדכן מצב עכשיו";
-                    }, 5000);
+                    }, 3000);
                 })
-                .catch(error => {
-                    console.error("Error:", error);
+                .catch(err => {
                     btn.disabled = false;
-                    btn.innerText = "❌ תקלה בחיבור";
+                    btn.innerText = "❌ תקלה";
                 });
         }
 
-        // האזנה לנתונים מ-Firebase
-        const statusRef = firebase.database().ref('alert_status');
-        statusRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            console.log("Firebase Data Received:", data);
-
-            if (data) {
-                const container = document.getElementById('container');
-                const label = document.getElementById('statusLabel');
-                const timeLabel = document.getElementById('timeLabel');
-                const icon = document.getElementById('statusIcon');
-
-                // עדכון השעה
-                timeLabel.innerText = data.last_update || "00:00:00";
-                
-                // עדכון הסטטוס והעיצוב
-                container.className = "status-container";
-                
-                if (data.status === 'green') { 
-                    container.classList.add('status-green'); 
-                    label.innerText = "העיר שקטה"; 
-                    label.style.color = "#2ecc71"; 
-                    icon.innerText = "🛡️"; 
-                }
-                else if (data.status === 'yellow') { 
-                    container.classList.add('status-yellow'); 
-                    label.innerText = "חשש להתרעה"; 
-                    label.style.color = "#f1c40f"; 
-                    icon.innerText = "⚠️"; 
-                }
-                else if (data.status === 'orange') { 
-                    container.classList.add('status-orange'); 
-                    label.innerText = "התרעה מקדימה"; 
-                    label.style.color = "#e67e22"; 
-                    icon.innerText = "🔔"; 
-                }
-                else if (data.status === 'red') { 
-                    container.classList.add('status-red'); 
-                    label.innerText = "צבע אדום!"; 
-                    label.style.color = "#e74c3c"; 
-                    icon.innerText = "🚨"; 
-                }
-            } else {
-                document.getElementById('statusLabel').innerText = "ממתין לנתונים...";
-            }
-        }, (error) => {
-            console.error("Firebase Error:", error);
-            document.getElementById('statusLabel').innerText = "שגיאת חיבור";
-        });
+        // טעינה ראשונית ועדכון אוטומטי כל 10 שניות (באתר עצמו)
+        fetchData();
+        setInterval(fetchData, 10000);
     </script>
 </body>
 </html>
