@@ -105,7 +105,14 @@
             border-radius: 25px;
         }
 
-        .footer { margin-top: 50px; color: #475569; font-size: 0.85rem; font-weight: 600; padding-bottom: 30px; }
+        .footer { 
+            margin-top: 50px; 
+            color: #475569; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            padding-bottom: 30px; 
+            letter-spacing: 0.5px;
+        }
 
         .status-green .status-circle { border-color: var(--success-green); }
         .status-yellow .status-circle { border-color: var(--warning-yellow); }
@@ -133,7 +140,7 @@
         רענן מצב
     </button>
 
-    <div class="footer">מערכת דיווח דימונה &copy; 2026</div>
+    <div class="footer">פותח ע"י גלבוע רוזיליו &copy; 2026</div>
 
     <script>
         const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
@@ -189,19 +196,19 @@
             else { label.style.fontSize = "2rem"; }
         }
 
-            function triggerUpdate() {
-                const btn = document.getElementById('updateBtn');
-                btn.disabled = true;
-                btn.innerText = "מעדכן...";
-                fetch("https://dimona-alerts-bot.onrender.com/health")
-                    .then(() => {
-                        setTimeout(() => {
-                            fetchData();
-                            btn.disabled = false;
-                            btn.innerText = "רענן מצב";
-                        }, 2500);
-                    });
-            }
+        function triggerUpdate() {
+            const btn = document.getElementById('updateBtn');
+            btn.disabled = true;
+            btn.innerText = "מעדכן...";
+            fetch("https://dimona-alerts-bot.onrender.com/health")
+                .then(() => {
+                    setTimeout(() => {
+                        fetchData();
+                        btn.disabled = false;
+                        btn.innerText = "רענן מצב";
+                    }, 2500);
+                });
+        }
 
         fetchData();
         setInterval(fetchData, 10000);
