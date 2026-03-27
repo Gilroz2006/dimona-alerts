@@ -37,8 +37,7 @@
         }
 
         .profile-image {
-            width: 160px;
-            height: 160px;
+            width: 160px; height: 160px;
             border-radius: 50%;
             border: 4px solid rgba(255,255,255,0.2);
             box-shadow: 0 15px 30px rgba(0,0,0,0.4);
@@ -54,25 +53,31 @@
             border-radius: 50px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
             display: flex; flex-direction: column; align-items: center;
-            width: 320px;
+            width: 340px;
         }
 
         .status-circle {
-            width: 240px; height: 240px;
+            width: 280px; height: 280px;
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 10px solid #334155;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 12px solid #334155;
             transition: all 0.6s ease;
             background: rgba(15, 23, 42, 0.6);
-            padding: 25px;
+            padding: 20px;
             box-sizing: border-box;
         }
 
         #statusLabel { 
             font-weight: 800; 
             margin: 0; 
-            line-height: 1.2; 
+            line-height: 1.1; 
             width: 100%;
+        }
+
+        .percentage-label {
+            font-size: 1.5rem; /* גודל ברור לאחוזים */
+            font-weight: 700;
+            margin-top: 8px;
         }
 
         .status-red .status-circle { 
@@ -97,8 +102,6 @@
             transition: all 0.3s ease;
             box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
         }
-        .update-btn:active { transform: scale(0.96); }
-        .update-btn:disabled { background: #475569; opacity: 0.6; }
 
         .update-info { 
             margin-top: 30px; 
@@ -127,6 +130,7 @@
     <div id="mainCard" class="status-card">
         <div class="status-circle">
             <h2 id="statusLabel">טוען...</h2>
+            <div id="percentLabel" class="percentage-label"></div>
         </div>
         
         <div class="update-info">
@@ -153,6 +157,7 @@
         function updateUI(data) {
             const card = document.getElementById('mainCard');
             const label = document.getElementById('statusLabel');
+            const percentLabel = document.getElementById('percentLabel');
             const timeLabel = document.getElementById('timeLabel');
 
             timeLabel.innerText = data.last_update || "00:00:00";
@@ -160,31 +165,38 @@
 
             let text = "";
             let color = "";
+            let percent = "";
 
             if (data.status === 'green') { 
                 card.classList.add('status-green'); 
                 text = "אין התרעות כרגע"; 
                 color = "var(--success-green)"; 
+                percent = "0%";
             } else if (data.status === 'yellow') { 
                 card.classList.add('status-yellow'); 
                 text = "כנראה לא פה, עונג צאי מהממ\"ד"; 
                 color = "var(--warning-yellow)"; 
+                percent = "30%";
             } else if (data.status === 'orange') { 
                 card.classList.add('status-orange'); 
                 text = "אולי פה, לא מתחייב"; 
                 color = "var(--orange-alert)"; 
+                percent = "60%";
             } else if (data.status === 'red') { 
                 card.classList.add('status-red'); 
                 text = "תכניסו את צ'אקו, תכף אזעקה"; 
                 color = "var(--danger-red)"; 
+                percent = "100%";
             }
+
+            label.innerText = text;
+            label.style.color = color;
+            percentLabel.innerText = `(${percent})`; // רק הסוגריים עם האחוז
+            percentLabel.style.color = color;
 
             if (text.length > 25) { label.style.fontSize = "1.25rem"; }
             else if (text.length > 15) { label.style.fontSize = "1.5rem"; }
             else { label.style.fontSize = "1.85rem"; }
-
-            label.innerText = text;
-            label.style.color = color;
         }
 
         function triggerUpdate() {
