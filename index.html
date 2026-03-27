@@ -49,9 +49,9 @@
             border: 10px solid #334155;
             transition: all 0.6s ease;
             background: rgba(15, 23, 42, 0.6);
-            padding: 20px;
+            padding: 25px;
             box-sizing: border-box;
-            overflow: hidden; /* מבטיח שהטקסט לא יחרוג */
+            overflow: hidden;
         }
 
         #statusLabel { 
@@ -59,7 +59,7 @@
             margin: 0; 
             line-height: 1.2; 
             width: 100%;
-            word-wrap: break-word; /* שובר שורות ארוכות */
+            word-wrap: break-word;
         }
 
         /* אנימציה למצב אדום */
@@ -154,7 +154,7 @@
                 color = "var(--success-green)"; 
             } else if (data.status === 'yellow') { 
                 card.classList.add('status-yellow'); 
-                text = "כנראה לא פה, עונג תצאי מהממ\"ד"; 
+                text = "כנראה לא פה, עונג צאי מהממ\"ד"; 
                 color = "var(--warning-yellow)"; 
             } else if (data.status === 'orange') { 
                 card.classList.add('status-orange'); 
@@ -166,13 +166,13 @@
                 color = "var(--danger-red)"; 
             }
 
-            // --- מנגנון התאמת גודל פונט אוטומטי ---
+            // התאמת גודל פונט אוטומטי למשפטים
             if (text.length > 25) {
-                label.style.fontSize = "1.3rem"; // משפט ארוך מאוד (צהוב/אדום)
+                label.style.fontSize = "1.25rem"; 
             } else if (text.length > 15) {
-                label.style.fontSize = "1.6rem"; // משפט בינוני
+                label.style.fontSize = "1.5rem"; 
             } else {
-                label.style.fontSize = "1.9rem"; // משפט קצר (ירוק)
+                label.style.fontSize = "1.85rem"; 
             }
 
             label.innerText = text;
