@@ -56,33 +56,35 @@
     <div class="footer">פותח ע"י גלבוע רוזיליו</div>
 
     <script>
-        // הגדרות Firebase - אם יש לך apiKey בהגדרות הפרויקט, מומלץ להוסיף אותו כאן
+        // הגדרת Firebase
         const firebaseConfig = { 
             databaseURL: "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app" 
         };
         
+        // אתחול
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
 
-        // פונקציית העדכון הידנית
+        // פונקציית העדכון הידנית (הכפתור)
         function triggerUpdate() {
             const btn = document.getElementById('updateBtn');
             btn.disabled = true;
-            btn.innerText = "מבצע סריקה...";
+            btn.innerText = "⏳ שולח בקשה...";
 
             fetch("https://dimona-alerts-bot.onrender.com/health")
                 .then(response => {
-                    console.log("Health check triggered");
+                    console.log("Request sent to bot");
+                    btn.innerText = "✅ נשלח! ממתין לעדכון...";
                     setTimeout(() => {
                         btn.disabled = false;
                         btn.innerText = "🔄 עדכן מצב עכשיו";
-                    }, 3000);
+                    }, 5000);
                 })
                 .catch(error => {
-                    console.error("Fetch error:", error);
+                    console.error("Error:", error);
                     btn.disabled = false;
-                    btn.innerText = "❌ תקלה - נסה שוב";
+                    btn.innerText = "❌ תקלה בחיבור";
                 });
         }
 
@@ -90,7 +92,7 @@
         const statusRef = firebase.database().ref('alert_status');
         statusRef.on('value', (snapshot) => {
             const data = snapshot.val();
-            console.log("Firebase Data:", data);
+            console.log("Firebase Data Received:", data);
 
             if (data) {
                 const container = document.getElementById('container');
@@ -98,9 +100,12 @@
                 const timeLabel = document.getElementById('timeLabel');
                 const icon = document.getElementById('statusIcon');
 
+                // עדכון השעה
+                timeLabel.innerText = data.last_update || "00:00:00";
+                
+                // עדכון הסטטוס והעיצוב
                 container.className = "status-container";
-                timeLabel.innerText = data.last_update || "--:--:--";
-
+                
                 if (data.status === 'green') { 
                     container.classList.add('status-green'); 
                     label.innerText = "העיר שקטה"; 
@@ -131,3 +136,7 @@
         }, (error) => {
             console.error("Firebase Error:", error);
             document.getElementById('statusLabel').innerText = "שגיאת חיבור";
+        });
+    </script>
+</body>
+</html>
