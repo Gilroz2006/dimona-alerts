@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #0a0e14; color: white; font-family: sans-serif; }
-        .header { text-align: center; margin-bottom: 40px; }
+        .header { text-align: center; margin-bottom: 30px; }
         .status-container { position: relative; width: 280px; height: 280px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.5s ease; border: 8px solid #1a1f26; }
         .status-circle { width: 240px; height: 240px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .status-green { border-color: #2ecc71; box-shadow: 0 0 30px rgba(46, 204, 113, 0.2); }
@@ -16,8 +16,26 @@
         .status-orange { border-color: #e67e22; box-shadow: 0 0 30px rgba(230, 126, 34, 0.2); }
         .status-red { border-color: #e74c3c; box-shadow: 0 0 30px rgba(231, 76, 60, 0.4); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        .update-info { margin-top: 30px; background: #161b22; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; }
-        .footer { margin-top: 40px; color: #444; font-size: 0.8rem; }
+        
+        /* עיצוב כפתור העדכון */
+        .update-btn { 
+            margin-top: 25px; 
+            padding: 12px 30px; 
+            border-radius: 25px; 
+            border: none; 
+            background: #3498db; 
+            color: white; 
+            font-size: 1rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        .update-btn:active { transform: scale(0.95); background: #2980b9; }
+        .update-btn:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
+
+        .update-info { margin-top: 25px; background: #161b22; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; }
+        .footer { margin-top: 30px; color: #444; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -25,59 +43,44 @@
         <p style="color: #888; margin: 0;">מערכת התרעות עירונית</p>
         <h1 style="margin: 5px 0;">עיר דימונה</h1>
     </div>
+
     <div id="container" class="status-container">
         <div class="status-circle">
             <div id="statusIcon" style="font-size: 3rem;">⏳</div>
             <div id="statusLabel" style="font-size: 1.5rem; font-weight: bold; margin-top: 10px;">מתחבר...</div>
         </div>
     </div>
-    <div class="update-info">עדכון אחרון: <span id="timeLabel">--:--:--</span></div>
+
+    <button id="updateBtn" class="update-btn" onclick="triggerUpdate()">🔄 עדכן מצב עכשיו</button>
+
+    <div class="update-info">בדיקה אחרונה: <span id="timeLabel">--:--:--</span></div>
     <div class="footer">פותח ע"י גלבוע רוזיליו</div>
 
     <script>
-        // פקודה לעורר את הבוט ולהריץ סריקה מיד עם פתיחת האתר
-        fetch("https://dimona-alerts-bot.onrender.com/health").catch(e => console.log("Wake up call sent"));
-
         const firebaseConfig = { databaseURL: "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
 
-        firebase.database().ref('alert_status').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                const container = document.getElementById('container');
-                const label = document.getElementById('statusLabel');
-                const timeLabel = document.getElementById('timeLabel');
-                const icon = document.getElementById('statusIcon');
+        // פונקציה להפעלת עדכון ידני בלבד
+        function triggerUpdate() {
+            const btn = document.getElementById('updateBtn');
+            btn.disabled = true;
+            btn.innerText = "מבצע סריקה...";
 
-                container.className = "status-container";
-                timeLabel.innerText = data.last_update;
+            // "דפיקה בדלת" של הבוט ב-Render
+            fetch("https://dimona-alerts-bot.onrender.com/health")
+                .then(response => {
+                    console.log("Update requested");
+                    // מחזיר את הכפתור למצב פעיל אחרי 3 שניות כדי למנוע הצפה
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerText = "🔄 עדכן מצב עכשיו";
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    btn.disabled = false;
+                    btn.innerText = "❌ תקלה - נסה שוב";
+                });
+        }
 
-                if (data.status === 'green') { 
-                    container.classList.add('status-green'); 
-                    label.innerText = "העיר שקטה"; 
-                    label.style.color = "#2ecc71"; 
-                    icon.innerText = "🛡️"; 
-                }
-                else if (data.status === 'yellow') { 
-                    container.classList.add('status-yellow'); 
-                    label.innerText = "חשש להתרעה"; 
-                    label.style.color = "#f1c40f"; 
-                    icon.innerText = "⚠️"; 
-                }
-                else if (data.status === 'orange') { 
-                    container.classList.add('status-orange'); 
-                    label.innerText = "התרעה מקדימה"; 
-                    label.style.color = "#e67e22"; 
-                    icon.innerText = "🔔"; 
-                }
-                else if (data.status === 'red') { 
-                    container.classList.add('status-red'); 
-                    label.innerText = "צבע אדום!"; 
-                    label.style.color = "#e74c3c"; 
-                    icon.innerText = "🚨"; 
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+        // האז
