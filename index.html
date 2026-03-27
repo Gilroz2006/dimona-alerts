@@ -111,7 +111,13 @@
             font-size: 0.85rem; 
             font-weight: 600; 
             padding-bottom: 30px; 
-            letter-spacing: 0.5px;
+        }
+
+        .disclaimer {
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            color: #64748b;
+            font-weight: 400;
         }
 
         .status-green .status-circle { border-color: var(--success-green); }
@@ -140,7 +146,10 @@
         רענן מצב
     </button>
 
-    <div class="footer">פותח ע"י גלבוע רוזיליו &copy; 2026</div>
+    <div class="footer">
+        <div class="disclaimer">אין באמור התחייבות רשמית, יש להתייחס רק לפקע"ר</div>
+        <div>פותח ע"י גלבוע רוזיליו &copy; 2026</div>
+    </div>
 
     <script>
         const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
@@ -207,6 +216,10 @@
                         btn.disabled = false;
                         btn.innerText = "רענן מצב";
                     }, 2500);
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerText = "שגיאה ברענון";
                 });
         }
 
