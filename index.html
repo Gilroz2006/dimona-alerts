@@ -24,51 +24,54 @@
             background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
             color: var(--text-main); 
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            text-align: center;
         }
 
-        .header { text-align: center; margin-bottom: 40px; }
+        .header { margin-bottom: 30px; }
         .header p { margin: 0; color: var(--text-muted); font-weight: 500; font-size: 1.1rem; }
-        .header h1 { margin: 5px 0 0; font-size: 4rem; font-weight: 900; letter-spacing: -2px; line-height: 1; color: white; }
+        .header h1 { margin: 5px 0 0; font-size: 4.5rem; font-weight: 900; letter-spacing: -2px; line-height: 1; color: white; }
 
         .status-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 50px 30px;
+            padding: 40px;
             border-radius: 50px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 340px;
-            transition: all 0.5s ease;
+            display: flex; flex-direction: column; align-items: center;
+            width: 320px;
         }
 
         .status-circle {
-            width: 150px; height: 150px;
+            width: 240px; height: 240px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            border: 8px solid #334155;
-            margin-bottom: 30px;
+            border: 10px solid #334155;
             transition: all 0.6s ease;
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(15, 23, 42, 0.6);
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden; /* מבטיח שהטקסט לא יחרוג */
         }
 
-        /* רק באדום יש אנימציה */
+        #statusLabel { 
+            font-weight: 800; 
+            margin: 0; 
+            line-height: 1.2; 
+            width: 100%;
+            word-wrap: break-word; /* שובר שורות ארוכות */
+        }
+
+        /* אנימציה למצב אדום */
         .status-red .status-circle { 
-            animation: pulse-red 1.5s infinite; 
+            animation: pulse-red 1.2s infinite; 
             border-color: var(--danger-red);
         }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            70% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-
-        #statusIcon { font-size: 4rem; display: none; } /* מוסתר כברירת מחדל */
-        .status-red #statusIcon { display: block; } /* מוצג רק באדום */
-
-        #statusLabel { font-size: 1.5rem; font-weight: 800; margin: 0; text-align: center; line-height: 1.4; min-height: 4rem; display: flex; align-items: center; }
 
         .update-btn { 
             margin-top: 40px; 
@@ -93,10 +96,10 @@
             padding: 10px 20px;
             border-radius: 25px;
         }
-        
+
         .footer { margin-top: 50px; color: #475569; font-size: 0.8rem; font-weight: 600; }
 
-        /* צבעים לפי סטטוס */
+        /* צבעים בסיסיים */
         .status-green .status-circle { border-color: var(--success-green); }
         .status-yellow .status-circle { border-color: var(--warning-yellow); }
         .status-orange .status-circle { border-color: var(--orange-alert); }
@@ -110,9 +113,8 @@
 
     <div id="mainCard" class="status-card">
         <div class="status-circle">
-            <div id="statusIcon">🚨</div>
+            <h2 id="statusLabel">טוען...</h2>
         </div>
-        <h2 id="statusLabel">טוען...</h2>
         
         <div class="update-info">
             עדכון אחרון: <span id="timeLabel">--:--:--</span>
@@ -143,23 +145,38 @@
             timeLabel.innerText = data.last_update || "00:00:00";
             card.className = "status-card";
 
+            let text = "";
+            let color = "";
+
             if (data.status === 'green') { 
                 card.classList.add('status-green'); 
-                label.innerText = "אין התרעות כרגע"; 
-                label.style.color = "var(--success-green)"; 
+                text = "אין התרעות כרגע"; 
+                color = "var(--success-green)"; 
             } else if (data.status === 'yellow') { 
                 card.classList.add('status-yellow'); 
-                label.innerText = "כנראה לא פה, עונג אפשר לצאת מהממ\"ד"; 
-                label.style.color = "var(--warning-yellow)"; 
+                text = "כנראה לא פה, אפשר לצאת מהממ\"ד"; 
+                color = "var(--warning-yellow)"; 
             } else if (data.status === 'orange') { 
                 card.classList.add('status-orange'); 
-                label.innerText = "אולי פה, לא מתחייב"; 
-                label.style.color = "var(--orange-alert)"; 
+                text = "אולי פה, לא מתחייב"; 
+                color = "var(--orange-alert)"; 
             } else if (data.status === 'red') { 
                 card.classList.add('status-red'); 
-                label.innerText = "תכניסו את צ'אקו, תכף אזעקה"; 
-                label.style.color = "var(--danger-red)"; 
+                text = "תכניסו את צ'אקו, תכף אזעקה"; 
+                color = "var(--danger-red)"; 
             }
+
+            // --- מנגנון התאמת גודל פונט אוטומטי ---
+            if (text.length > 25) {
+                label.style.fontSize = "1.3rem"; // משפט ארוך מאוד (צהוב/אדום)
+            } else if (text.length > 15) {
+                label.style.fontSize = "1.6rem"; // משפט בינוני
+            } else {
+                label.style.fontSize = "1.9rem"; // משפט קצר (ירוק)
+            }
+
+            label.innerText = text;
+            label.style.color = color;
         }
 
         function triggerUpdate() {
