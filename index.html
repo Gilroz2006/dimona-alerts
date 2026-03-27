@@ -3,118 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דימונה LIVE - מערכת התרעות</title>
+    <title>דימונה LIVE | מצב העיר</title>
     <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #0a0e14; color: white; font-family: sans-serif; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .status-container { position: relative; width: 280px; height: 280px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.5s ease; border: 8px solid #1a1f26; }
-        .status-circle { width: 240px; height: 240px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .status-green { border-color: #2ecc71; box-shadow: 0 0 30px rgba(46, 204, 113, 0.2); }
-        .status-yellow { border-color: #f1c40f; box-shadow: 0 0 30px rgba(241, 196, 15, 0.2); }
-        .status-orange { border-color: #e67e22; box-shadow: 0 0 30px rgba(230, 126, 34, 0.2); }
-        .status-red { border-color: #e74c3c; box-shadow: 0 0 30px rgba(231, 76, 60, 0.4); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-blue: #3b82f6;
+            --success-green: #22c55e;
+            --warning-yellow: #eab308;
+            --orange-alert: #f97316;
+            --danger-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body { 
+            margin: 0; padding: 0; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            min-height: 100vh; 
+            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .header { text-align: center; margin-bottom: 40px; }
+        .header p { margin: 0; color: var(--text-muted); font-weight: 500; font-size: 1.1rem; }
+        .header h1 { margin: 5px 0 0; font-size: 4rem; font-weight: 900; letter-spacing: -2px; line-height: 1; color: white; }
+
+        .status-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 50px 30px;
+            border-radius: 50px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 340px;
+            transition: all 0.5s ease;
+        }
+
+        .status-circle {
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 8px solid #334155;
+            margin-bottom: 30px;
+            transition: all 0.6s ease;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        /* רק באדום יש אנימציה */
+        .status-red .status-circle { 
+            animation: pulse-red 1.5s infinite; 
+            border-color: var(--danger-red);
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        #statusIcon { font-size: 4rem; display: none; } /* מוסתר כברירת מחדל */
+        .status-red #statusIcon { display: block; } /* מוצג רק באדום */
+
+        #statusLabel { font-size: 1.5rem; font-weight: 800; margin: 0; text-align: center; line-height: 1.4; min-height: 4rem; display: flex; align-items: center; }
+
         .update-btn { 
-            margin-top: 25px; 
-            padding: 12px 30px; 
-            border-radius: 25px; 
+            margin-top: 40px; 
+            padding: 20px 50px; 
+            border-radius: 50px; 
             border: none; 
-            background: #3498db; 
+            background: var(--primary-blue); 
             color: white; 
-            font-size: 1rem; 
-            font-weight: bold; 
+            font-size: 1.2rem; font-weight: 800; 
             cursor: pointer; 
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
         }
-        .update-btn:active { transform: scale(0.95); background: #2980b9; }
-        .update-btn:disabled { background: #555; cursor: not-allowed; }
+        .update-btn:active { transform: scale(0.96); }
+        .update-btn:disabled { background: #475569; opacity: 0.6; }
 
-        .update-info { margin-top: 25px; background: #161b22; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; }
-        .footer { margin-top: 30px; color: #444; font-size: 0.8rem; }
+        .update-info { 
+            margin-top: 30px; 
+            font-size: 0.9rem; 
+            color: var(--text-muted); 
+            background: rgba(255,255,255,0.05);
+            padding: 10px 20px;
+            border-radius: 25px;
+        }
+        
+        .footer { margin-top: 50px; color: #475569; font-size: 0.8rem; font-weight: 600; }
+
+        /* צבעים לפי סטטוס */
+        .status-green .status-circle { border-color: var(--success-green); }
+        .status-yellow .status-circle { border-color: var(--warning-yellow); }
+        .status-orange .status-circle { border-color: var(--orange-alert); }
     </style>
 </head>
 <body>
     <div class="header">
-        <p style="color: #888; margin: 0;">מערכת התרעות עירונית</p>
-        <h1 style="margin: 5px 0;">עיר דימונה</h1>
+        <p>המצב הנוכחי בעיר</p>
+        <h1>דימונה</h1>
     </div>
 
-    <div id="container" class="status-container">
+    <div id="mainCard" class="status-card">
         <div class="status-circle">
-            <div id="statusIcon" style="font-size: 3rem;">⏳</div>
-            <div id="statusLabel" style="font-size: 1.5rem; font-weight: bold; margin-top: 10px;">טוען נתונים...</div>
+            <div id="statusIcon">🚨</div>
+        </div>
+        <h2 id="statusLabel">טוען...</h2>
+        
+        <div class="update-info">
+            עדכון אחרון: <span id="timeLabel">--:--:--</span>
         </div>
     </div>
 
-    <button id="updateBtn" class="update-btn" onclick="triggerUpdate()">🔄 עדכן מצב עכשיו</button>
+    <button id="updateBtn" class="update-btn" onclick="triggerUpdate()">
+        עדכן מצב עכשיו
+    </button>
 
-    <div class="update-info">בדיקה אחרונה: <span id="timeLabel">--:--:--</span></div>
-    <div class="footer">פותח ע"י גלבוע רוזיליו</div>
+    <div class="footer">פותח ע"י גלבוע רוזיליו &copy; 2026</div>
 
     <script>
         const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
 
-        // פונקציה למשיכת הנתונים מ-Firebase
         function fetchData() {
             fetch(dbUrl)
                 .then(res => res.json())
-                .then(data => {
-                    if (data) {
-                        updateUI(data);
-                    }
-                })
-                .catch(err => console.error("Error fetching data:", err));
+                .then(data => { if (data) updateUI(data); })
+                .catch(err => console.error("Error:", err));
         }
 
-        // עדכון הממשק
         function updateUI(data) {
-            const container = document.getElementById('container');
+            const card = document.getElementById('mainCard');
             const label = document.getElementById('statusLabel');
             const timeLabel = document.getElementById('timeLabel');
-            const icon = document.getElementById('statusIcon');
 
             timeLabel.innerText = data.last_update || "00:00:00";
-            container.className = "status-container";
+            card.className = "status-card";
 
             if (data.status === 'green') { 
-                container.classList.add('status-green'); 
-                label.innerText = "העיר שקטה"; label.style.color = "#2ecc71"; icon.innerText = "🛡️"; 
+                card.classList.add('status-green'); 
+                label.innerText = "אין התרעות כרגע"; 
+                label.style.color = "var(--success-green)"; 
             } else if (data.status === 'yellow') { 
-                container.classList.add('status-yellow'); 
-                label.innerText = "חשש להתרעה"; label.style.color = "#f1c40f"; icon.innerText = "⚠️"; 
+                card.classList.add('status-yellow'); 
+                label.innerText = "כנראה לא פה, עונג אפשר לצאת מהממ\"ד"; 
+                label.style.color = "var(--warning-yellow)"; 
             } else if (data.status === 'orange') { 
-                container.classList.add('status-orange'); 
-                label.innerText = "התרעה מקדימה"; label.style.color = "#e67e22"; icon.innerText = "🔔"; 
+                card.classList.add('status-orange'); 
+                label.innerText = "אולי פה, לא מתחייב"; 
+                label.style.color = "var(--orange-alert)"; 
             } else if (data.status === 'red') { 
-                container.classList.add('status-red'); 
-                label.innerText = "צבע אדום!"; label.style.color = "#e74c3c"; icon.innerText = "🚨"; 
+                card.classList.add('status-red'); 
+                label.innerText = "תכניסו את צ'אקו, תכף אזעקה"; 
+                label.style.color = "var(--danger-red)"; 
             }
         }
 
-        // הפעלת סריקה בבוט
         function triggerUpdate() {
             const btn = document.getElementById('updateBtn');
             btn.disabled = true;
-            btn.innerText = "מבצע סריקה...";
+            btn.innerText = "בודק...";
 
             fetch("https://dimona-alerts-bot.onrender.com/health")
                 .then(() => {
-                    // מחכים 3 שניות שהבוט יסיים לעדכן את ה-Firebase ואז מושכים נתונים חדשים
                     setTimeout(() => {
                         fetchData();
                         btn.disabled = false;
-                        btn.innerText = "🔄 עדכן מצב עכשיו";
+                        btn.innerText = "עדכן מצב עכשיו";
                     }, 3000);
                 })
                 .catch(err => {
                     btn.disabled = false;
-                    btn.innerText = "❌ תקלה";
+                    btn.innerText = "נסה שוב";
                 });
         }
 
-        // טעינה ראשונית ועדכון אוטומטי כל 10 שניות (באתר עצמו)
         fetchData();
         setInterval(fetchData, 10000);
     </script>
