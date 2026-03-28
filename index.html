@@ -176,22 +176,22 @@
 
             if (data.status === 'green') { 
                 card.classList.add('status-green'); 
-                text = "אין התרעות כרגע"; 
+                text = "אין התרעות כרגע 🟢"; 
                 color = "var(--success-green)"; 
                 percent = "0%";
             } else if (data.status === 'yellow') { 
                 card.classList.add('status-yellow'); 
-                text = "לא פה כנראה"; 
+                text = "⚠️ דריכות נמוכה - מטח רחוק"; 
                 color = "var(--warning-yellow)"; 
                 percent = "30%";
             } else if (data.status === 'orange') { 
                 card.classList.add('status-orange'); 
-                text = "סיכוי סביר שכאן, תתכוננו"; 
+                text = "❗ דריכות גבוהה - מטח מתקרב"; 
                 color = "var(--orange-alert)"; 
                 percent = "60%";
             } else if (data.status === 'red') { 
                 card.classList.add('status-red'); 
-                text = "תהיה אזעקה, תתמגנו"; 
+                text = "🚨 תהיה אזעקה, תתמגנו"; 
                 color = "var(--danger-red)"; 
                 percent = "100%";
             }
@@ -201,30 +201,4 @@
             percentLabel.innerText = `(${percent})`;
             percentLabel.style.color = color;
 
-            if (text.length > 20) { label.style.fontSize = "1.5rem"; }
-            else { label.style.fontSize = "2rem"; }
-        }
-
-        function triggerUpdate() {
-            const btn = document.getElementById('updateBtn');
-            btn.disabled = true;
-            btn.innerText = "מעדכן...";
-            fetch("https://dimona-alerts-bot.onrender.com/health")
-                .then(() => {
-                    setTimeout(() => {
-                        fetchData();
-                        btn.disabled = false;
-                        btn.innerText = "רענן מצב";
-                    }, 2500);
-                })
-                .catch(err => {
-                    btn.disabled = false;
-                    btn.innerText = "שגיאה ברענון";
-                });
-        }
-
-        fetchData();
-        setInterval(fetchData, 10000);
-    </script>
-</body>
-</html>
+            if (text.
