@@ -23,75 +23,111 @@
             min-height: 100vh; 
             background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
             color: var(--text-main); 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: sans-serif;
             text-align: center;
-        }
-
-        .header { margin-top: 40px; margin-bottom: 40px; }
-        .header h1 { 
-            margin: 0; 
-            font-size: 2.8rem; 
-            font-weight: 800; 
-            color: white; 
-            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .status-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 50px;
-            border-radius: 60px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; align-items: center;
-            width: 340px;
+            padding: 40px;
+            border-radius: 40px;
+            width: 300px;
         }
 
         .status-circle {
-            width: 300px; height: 300px;
+            width: 260px; height: 260px;
             border-radius: 50%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 14px solid #334155;
-            transition: all 0.6s ease;
-            background: rgba(15, 23, 42, 0.6);
-            padding: 30px;
-            box-sizing: border-box;
+            border: 10px solid #334155;
+            margin: 0 auto;
+            transition: all 0.5s ease;
         }
 
-        #statusLabel { 
-            font-weight: 800; 
-            margin: 0; 
-            line-height: 1.2; 
-            width: 100%;
-        }
-
-        .percentage-label {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-top: 15px;
-            opacity: 0.9;
-        }
-
-        .status-red .status-circle { 
-            animation: pulse-red 1.2s infinite; 
-            border-color: var(--danger-red);
-        }
-        @keyframes pulse-red {
+        .status-red .status-circle { animation: pulse 1.2s infinite; border-color: var(--danger-red); }
+        @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-            70% { box-shadow: 0 0 0 30px rgba(239, 68, 68, 0); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
         .update-btn { 
-            margin-top: 50px; 
-            padding: 20px 60px; 
-            border-radius: 50px; 
-            border: none; 
-            background: var(--primary-blue); 
-            color: white; 
-            font-size: 1.2rem; font-weight: 700; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+            margin-top: 30px; padding: 15px 40px; border-radius: 30px; border: none; 
+            background: var(--primary-blue); color: white; font-weight: bold; cursor: pointer; 
         }
-        .update-btn:active { transform: scale
+
+        .update-info { margin-top: 20px; font-size: 0.8rem; color: var(--text-muted); }
+        .status-green .status-circle { border-color: var(--success-green); }
+        .status-yellow .status-circle { border-color: var(--warning-yellow); }
+        .status-orange .status-circle { border-color: var(--orange-alert); }
+    </style>
+</head>
+<body>
+
+    <h1 style="margin-bottom: 20px;">מצב נוכחי בדימונה</h1>
+
+    <div id="mainCard" class="status-card">
+        <div class="status-circle">
+            <h2 id="statusLabel" style="font-size: 1.5rem; margin: 10px;">טוען...</h2>
+            <div id="percentLabel" style="font-size: 1.2rem; font-weight: bold;"></div>
+        </div>
+        <div class="update-info">עדכון אחרון: <span id="timeLabel">--:--:--</span></div>
+    </div>
+
+    <button id="updateBtn" class="update-btn" onclick="triggerUpdate()">רענן מצב</button>
+
+    <script>
+        const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
+
+        function fetchData() {
+            fetch(dbUrl)
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        const card = document.getElementById('mainCard');
+                        const label = document.getElementById('statusLabel');
+                        const percentLabel = document.getElementById('percentLabel');
+                        const timeLabel = document.getElementById('timeLabel');
+
+                        timeLabel.innerText = data.last_update || "00:00:00";
+                        card.className = "status-card";
+
+                        if (data.status === 'green') {
+                            card.classList.add('status-green');
+                            label.innerText = "אין התרעות כרגע 🟢";
+                            label.style.color = "var(--success-green)";
+                            percentLabel.innerText = "(0%)";
+                        } else if (data.status === 'yellow') {
+                            card.classList.add('status-yellow');
+                            label.innerText = "⚠️ דריכות נמוכה - מטח רחוק";
+                            label.style.color = "var(--warning-yellow)";
+                            percentLabel.innerText = "(30%)";
+                        } else if (data.status === 'orange') {
+                            card.classList.add('status-orange');
+                            label.innerText = "❗ דריכות גבוהה - מטח מתקרב";
+                            label.style.color = "var(--orange-alert)";
+                            percentLabel.innerText = "(60%)";
+                        } else if (data.status === 'red') {
+                            card.classList.add('status-red');
+                            label.innerText = "🚨 תהיה אזעקה, תתמגנו";
+                            label.style.color = "var(--danger-red)";
+                            percentLabel.innerText = "(100%)";
+                        }
+                    }
+                })
+                .catch(err => console.error("Error:", err));
+        }
+
+        function triggerUpdate() {
+            const btn = document.getElementById('updateBtn');
+            btn.innerText = "מעדכן...";
+            fetch("https://dimona-alerts-bot.onrender.com/health")
+                .then(() => setTimeout(() => { fetchData(); btn.innerText = "רענן מצב"; }, 2000));
+        }
+
+        fetchData();
+        setInterval(fetchData, 10000);
+    </script>
+</body>
+</html>
