@@ -123,17 +123,17 @@
                             percentLabel.innerText = "(0%)";
                         } else if (data.status === 'yellow') {
                             card.classList.add('status-yellow');
-                            label.innerText = "⚠️ דריכות נמוכה - מטח רחוק";
+                            label.innerText = "⚠️ כוננות - מטח רחוק";
                             label.style.color = "var(--warning-yellow)";
-                            percentLabel.innerText = "(30%)";
+                            percentLabel.innerText = "(45%)";
                         } else if (data.status === 'orange') {
                             card.classList.add('status-orange');
                             label.innerText = "❗ דריכות גבוהה - מטח מתקרב";
                             label.style.color = "var(--orange-alert)";
-                            percentLabel.innerText = "(60%)";
+                            percentLabel.innerText = "(80%)";
                         } else if (data.status === 'red') {
                             card.classList.add('status-red');
-                            label.innerText = "🚨 תהיה אזעקה, תתמגנו";
+                            label.innerText = "🚨 סכנה מיידית - תתמגנו";
                             label.style.color = "var(--danger-red)";
                             percentLabel.innerText = "(100%)";
                         }
