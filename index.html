@@ -54,35 +54,22 @@
         #statusLabel { font-weight: 800; margin: 0; line-height: 1.2; }
         .percentage-label { font-size: 1.4rem; font-weight: 700; margin-top: 10px; opacity: 0.9; }
 
-        /* --- הגדרות הבהובים (אנימציות) --- */
-
-        /* אדום - הכי מהיר (0.6 שניות) - הבהוב אגרסיבי */
-        .status-red .status-circle { 
-            animation: pulse-red 0.6s infinite; 
-            border-color: var(--danger-red); 
-        }
+        /* --- אנימציות הבהוב --- */
+        .status-red .status-circle { animation: pulse-red 0.6s infinite; border-color: var(--danger-red); }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
             70% { box-shadow: 0 0 0 35px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* כתום - בינוני (1.2 שניות) - המהירות הקודמת של האדום */
-        .status-orange .status-circle { 
-            animation: pulse-orange 1.2s infinite; 
-            border-color: var(--orange-alert); 
-        }
+        .status-orange .status-circle { animation: pulse-orange 1.2s infinite; border-color: var(--orange-alert); }
         @keyframes pulse-orange {
             0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.6); }
             70% { box-shadow: 0 0 0 25px rgba(249, 115, 22, 0); }
             100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
         }
 
-        /* צהוב - איטי (2.0 שניות) - המהירות הקודמת של הכתום */
-        .status-yellow .status-circle { 
-            animation: pulse-yellow 2s infinite; 
-            border-color: var(--warning-yellow); 
-        }
+        .status-yellow .status-circle { animation: pulse-yellow 2s infinite; border-color: var(--warning-yellow); }
         @keyframes pulse-yellow {
             0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
             70% { box-shadow: 0 0 0 20px rgba(234, 179, 8, 0); }
@@ -129,6 +116,23 @@
 
     <script>
         const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
+        let lastKnownStatus = 'green';
+
+        // פונקציית רטט לפי סטטוס
+        function handleVibration(status) {
+            if (!("vibrate" in navigator)) return;
+
+            if (status === 'red') {
+                // רטט מהיר: 150ms רטט, 100ms הפסקה (חוזר 4 פעמים)
+                navigator.vibrate([150, 100, 150, 100, 150, 100, 150]);
+            } else if (status === 'orange') {
+                // רטט בינוני: 400ms רטט, 400ms הפסקה
+                navigator.vibrate([400, 400, 400]);
+            } else if (status === 'yellow') {
+                // רטט קל: פולס אחד של 200ms
+                navigator.vibrate(200);
+            }
+        }
 
         function fetchData() {
             fetch(dbUrl)
@@ -164,6 +168,12 @@
                             label.style.color = "var(--danger-red)";
                             percentLabel.innerText = "(100%)";
                         }
+
+                        // הפעלת רטט רק אם הסטטוס השתנה למשהו שאינו ירוק
+                        if (data.status !== lastKnownStatus && data.status !== 'green') {
+                            handleVibration(data.status);
+                        }
+                        lastKnownStatus = data.status;
                         
                         if (label.innerText.length > 20) { label.style.fontSize = "1.3rem"; }
                         else { label.style.fontSize = "1.8rem"; }
@@ -175,6 +185,10 @@
         function triggerUpdate() {
             const btn = document.getElementById('updateBtn');
             btn.innerText = "מעדכן...";
+            
+            // "מעורר" את מנוע הרטט באישור המשתמש
+            if ("vibrate" in navigator) navigator.vibrate(50); 
+            
             fetch("https://dimona-alerts-bot.onrender.com/health")
                 .then(() => setTimeout(() => { fetchData(); btn.innerText = "רענן מצב"; }, 2500));
         }
