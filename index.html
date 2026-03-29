@@ -118,41 +118,48 @@
         const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
         let lastKnownStatus = 'green';
         let vibrationInterval = null;
+        let vibrationTimeout = null;
 
         function stopVibration() {
             if (vibrationInterval) {
                 clearInterval(vibrationInterval);
                 vibrationInterval = null;
             }
+            if (vibrationTimeout) {
+                clearTimeout(vibrationTimeout);
+                vibrationTimeout = null;
+            }
             if ("vibrate" in navigator) navigator.vibrate(0);
         }
 
         function handleVibration(status) {
-            stopVibration(); // עצירת רטט קודם אם היה
+            stopVibration(); 
             if (!("vibrate" in navigator) || status === 'green') return;
 
-            let pattern = [];
+            let pattern = 0;
             let intervalMs = 0;
 
             if (status === 'red') {
-                pattern = [300, 300]; // 300ms רטט, 300ms שקט (תואם להבהוב 0.6s)
-                intervalMs = 600;
+                pattern = 300; 
+                intervalMs = 600; // סה"כ מחזור של 0.6s
             } else if (status === 'orange') {
-                pattern = [600, 600]; // 600ms רטט, 600ms שקט (תואם להבהוב 1.2s)
-                intervalMs = 1200;
+                pattern = 600; 
+                intervalMs = 1200; // סה"כ מחזור של 1.2s
             } else if (status === 'yellow') {
-                pattern = [1000, 1000]; // 1s רטט, 1s שקט (תואם להבהוב 2.0s)
-                intervalMs = 2000;
+                pattern = 1000; 
+                intervalMs = 2000; // סה"כ מחזור של 2.0s (פעימות ארוכות ואיטיות)
             }
 
-            // הפעלת הרטט בלולאה
-            navigator.vibrate(pattern[0]);
+            // הפעלה ראשונית
+            navigator.vibrate(pattern);
+            
+            // לולאת רטט
             vibrationInterval = setInterval(() => {
-                navigator.vibrate(pattern[0]);
+                navigator.vibrate(pattern);
             }, intervalMs);
 
-            // עצירה אוטומטית אחרי 5 שניות
-            setTimeout(stopVibration, 5000);
+            // עצירה אוטומטית אחרי 8 שניות
+            vibrationTimeout = setTimeout(stopVibration, 8000);
         }
 
         function fetchData() {
@@ -168,7 +175,6 @@
                         timeLabel.innerText = data.last_update || "00:00:00";
                         card.className = "status-card";
 
-                        // אם הסטטוס השתנה, אנחנו עוצרים את הרטט הקודם ומפעילים חדש (או מפסיקים בירוק)
                         if (data.status !== lastKnownStatus) {
                             handleVibration(data.status);
                         }
@@ -207,10 +213,7 @@
         function triggerUpdate() {
             const btn = document.getElementById('updateBtn');
             btn.innerText = "מעדכן...";
-            
-            // "התעוררות" ראשונית של המנוע בלחיצת משתמש
             if ("vibrate" in navigator) navigator.vibrate(50); 
-            
             fetch("https://dimona-alerts-bot.onrender.com/health")
                 .then(() => setTimeout(() => { fetchData(); btn.innerText = "רענן מצב"; }, 2500));
         }
