@@ -39,6 +39,7 @@
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
             display: flex; flex-direction: column; align-items: center;
             width: 320px;
+            transition: all 0.5s ease;
         }
 
         .status-circle {
@@ -53,11 +54,28 @@
         #statusLabel { font-weight: 800; margin: 0; line-height: 1.2; }
         .percentage-label { font-size: 1.4rem; font-weight: 700; margin-top: 10px; opacity: 0.9; }
 
-        .status-red .status-circle { animation: pulse 1.2s infinite; border-color: var(--danger-red); }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-            70% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
+        /* --- אנימציות הבהוב --- */
+
+        /* אדום - הבהוב כבד ומהיר */
+        .status-red .status-circle { 
+            animation: pulse-red 1s infinite; 
+            border-color: var(--danger-red); 
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 30px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* כתום - הבהוב קל ואיטי */
+        .status-orange .status-circle { 
+            animation: pulse-orange 2s infinite; 
+            border-color: var(--orange-alert); 
+        }
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
         }
 
         .update-btn { 
@@ -76,7 +94,6 @@
 
         .status-green .status-circle { border-color: var(--success-green); }
         .status-yellow .status-circle { border-color: var(--warning-yellow); }
-        .status-orange .status-circle { border-color: var(--orange-alert); }
     </style>
 </head>
 <body>
