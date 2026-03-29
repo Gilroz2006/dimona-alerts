@@ -54,29 +54,42 @@
         #statusLabel { font-weight: 800; margin: 0; line-height: 1.2; }
         .percentage-label { font-size: 1.4rem; font-weight: 700; margin-top: 10px; opacity: 0.9; }
 
-        /* --- אנימציות הבהוב --- */
+        /* --- הגדרות הבהובים (אנימציות) --- */
 
-        /* אדום - הבהוב כבד ומהיר */
+        /* אדום - הכי מהיר (0.6 שניות) - הבהוב אגרסיבי */
         .status-red .status-circle { 
-            animation: pulse-red 1s infinite; 
+            animation: pulse-red 0.6s infinite; 
             border-color: var(--danger-red); 
         }
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 30px rgba(239, 68, 68, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
+            70% { box-shadow: 0 0 0 35px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* כתום - הבהוב קל ואיטי */
+        /* כתום - בינוני (1.2 שניות) - המהירות הקודמת של האדום */
         .status-orange .status-circle { 
-            animation: pulse-orange 2s infinite; 
+            animation: pulse-orange 1.2s infinite; 
             border-color: var(--orange-alert); 
         }
         @keyframes pulse-orange {
-            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
-            70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.6); }
+            70% { box-shadow: 0 0 0 25px rgba(249, 115, 22, 0); }
             100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
         }
+
+        /* צהוב - איטי (2.0 שניות) - המהירות הקודמת של הכתום */
+        .status-yellow .status-circle { 
+            animation: pulse-yellow 2s infinite; 
+            border-color: var(--warning-yellow); 
+        }
+        @keyframes pulse-yellow {
+            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(234, 179, 8, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        }
+
+        .status-green .status-circle { border-color: var(--success-green); }
 
         .update-btn { 
             margin-top: 40px; padding: 18px 50px; border-radius: 40px; border: none; 
@@ -91,9 +104,6 @@
 
         .footer { margin-top: 40px; color: #475569; font-size: 0.85rem; font-weight: 600; padding-bottom: 20px; }
         .disclaimer { font-size: 0.75rem; margin-bottom: 8px; color: #64748b; font-weight: 400; }
-
-        .status-green .status-circle { border-color: var(--success-green); }
-        .status-yellow .status-circle { border-color: var(--warning-yellow); }
     </style>
 </head>
 <body>
