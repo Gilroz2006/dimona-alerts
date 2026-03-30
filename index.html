@@ -116,52 +116,7 @@
 
     <script>
         const dbUrl = "https://dimonaalerts-default-rtdb.europe-west1.firebasedatabase.app/alert_status.json";
-        let lastKnownStatus = 'green';
-        let vibrationInterval = null;
-        let vibrationTimeout = null;
-
-        function stopVibration() {
-            if (vibrationInterval) {
-                clearInterval(vibrationInterval);
-                vibrationInterval = null;
-            }
-            if (vibrationTimeout) {
-                clearTimeout(vibrationTimeout);
-                vibrationTimeout = null;
-            }
-            if ("vibrate" in navigator) navigator.vibrate(0);
-        }
-
-        function handleVibration(status) {
-            stopVibration(); 
-            if (!("vibrate" in navigator) || status === 'green') return;
-
-            let pattern = 0;
-            let intervalMs = 0;
-
-            if (status === 'red') {
-                pattern = 300; 
-                intervalMs = 600; // סה"כ מחזור של 0.6s
-            } else if (status === 'orange') {
-                pattern = 600; 
-                intervalMs = 1200; // סה"כ מחזור של 1.2s
-            } else if (status === 'yellow') {
-                pattern = 1000; 
-                intervalMs = 2000; // סה"כ מחזור של 2.0s (פעימות ארוכות ואיטיות)
-            }
-
-            // הפעלה ראשונית
-            navigator.vibrate(pattern);
-            
-            // לולאת רטט
-            vibrationInterval = setInterval(() => {
-                navigator.vibrate(pattern);
-            }, intervalMs);
-
-            // עצירה אוטומטית אחרי 8 שניות
-            vibrationTimeout = setTimeout(stopVibration, 8000);
-        }
-
+        
         function fetchData() {
             fetch(dbUrl)
                 .then(res => res.json())
@@ -174,10 +129,6 @@
 
                         timeLabel.innerText = data.last_update || "00:00:00";
                         card.className = "status-card";
-
-                        if (data.status !== lastKnownStatus) {
-                            handleVibration(data.status);
-                        }
 
                         if (data.status === 'green') {
                             card.classList.add('status-green');
@@ -201,8 +152,6 @@
                             percentLabel.innerText = "(100%)";
                         }
 
-                        lastKnownStatus = data.status;
-                        
                         if (label.innerText.length > 20) { label.style.fontSize = "1.3rem"; }
                         else { label.style.fontSize = "1.8rem"; }
                     }
@@ -213,9 +162,10 @@
         function triggerUpdate() {
             const btn = document.getElementById('updateBtn');
             btn.innerText = "מעדכן...";
-            if ("vibrate" in navigator) navigator.vibrate(50); 
+            // הוסרה קריאת הרטט (vibrate)
             fetch("https://dimona-alerts-bot.onrender.com/health")
-                .then(() => setTimeout(() => { fetchData(); btn.innerText = "רענן מצב"; }, 2500));
+                .then(() => setTimeout(() => { fetchData(); btn.innerText = "רענן מצב"; }, 2500))
+                .catch(() => { fetchData(); btn.innerText = "רענן מצב"; });
         }
 
         fetchData();
